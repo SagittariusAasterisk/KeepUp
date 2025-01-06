@@ -89,11 +89,13 @@ buzzBtn.addEventListener("click", () => {
     appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
     measurementId: "G-3G12YZ6PPP"
   };
-  */
+  
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
   const analytics = getAnalytics(app);
 </script>
+
+*/
 
 
