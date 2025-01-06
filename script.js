@@ -1,9 +1,9 @@
 // Initialize Firebase
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_AUTH_DOMAIN",
-  databaseURL: "YOUR_DATABASE_URL",
-  projectId: "YOUR_PROJECT_ID",
+  apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+  authDomain: "keepup-2cbcc.firebaseapp.com",
+  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "keepup-2cbcc",
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
@@ -69,7 +69,7 @@ buzzBtn.addEventListener("click", () => {
   });
 });
 
-
+/*
 <script type="module">
   // Import the functions you need from the SDKs you need
   import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
@@ -89,6 +89,7 @@ buzzBtn.addEventListener("click", () => {
     appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
     measurementId: "G-3G12YZ6PPP"
   };
+  */
 
   // Initialize Firebase
   const app = initializeApp(firebaseConfig);
