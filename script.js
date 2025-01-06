@@ -68,3 +68,31 @@ buzzBtn.addEventListener("click", () => {
     }
   });
 });
+
+
+<script type="module">
+  // Import the functions you need from the SDKs you need
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-analytics.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
+
+  // Your web app's Firebase configuration
+  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+  const firebaseConfig = {
+    apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+    authDomain: "keepup-2cbcc.firebaseapp.com",
+    databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "keepup-2cbcc",
+    storageBucket: "keepup-2cbcc.firebasestorage.app",
+    messagingSenderId: "3097195539",
+    appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
+    measurementId: "G-3G12YZ6PPP"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+</script>
+
+
