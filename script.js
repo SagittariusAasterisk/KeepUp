@@ -1,3 +1,7 @@
+// Import Firebase modules (Only works if using <script type="module">)
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+import { getDatabase } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
 // Initialize Firebase
 const firebaseConfig = {
   apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
