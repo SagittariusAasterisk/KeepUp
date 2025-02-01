@@ -24,7 +24,20 @@
 
   <script>
     // Initialize Firebase app with your Firebase project configuration
-    const firebaseConfig = { /* your firebase config */ };
+    const firebaseConfig = {
+  apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+  authDomain: "keepup-2cbcc.firebaseapp.com",
+  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "keepup-2cbcc",
+  storageBucket: "keepup-2cbcc.firebasestorage.app",
+  messagingSenderId: "3097195539",
+  appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
+  measurementId: "G-3G12YZ6PPP"
+  /*apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+  authDomain: "keepup-2cbcc.firebaseapp.com",
+  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "keepup-2cbcc",*/
+};
     const app = firebase.initializeApp(firebaseConfig); // Initialize Firebase
     const db = firebase.firestore(); // Access Firestore database
     const auth = firebase.auth(); // Access Firebase Authentication
