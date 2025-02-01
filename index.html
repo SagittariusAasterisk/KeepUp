@@ -1,25 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Buzzer Game</title>
-  <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+  
+  <!-- Include Firebase SDK scripts for App, Authentication, and Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
 </head>
 <body>
-  <div id="app">
-    <h1>Buzzer Game</h1>
-    <div id="setup">
-      <button id="create-group">Create Group</button>
-      <input type="text" id="group-code" placeholder="Enter Group Code">
-      <button id="join-group">Join Group</button>
-    </div>
-    <div id="game" style="display: none;">
-      <h2 id="group-info"></h2>
-      <button id="buzz" style="display: none;">Buzz!</button>
-      <h3 id="result"></h3>
-    </div>
+  <!-- Button to create a new game -->
+  <button id="createGameButton">Create Game</button>
+  
+  <div>
+    <!-- Input field where users can type the 4-digit game code -->
+    <input type="text" id="gameCodeInput" placeholder="Enter 4-digit code">
+    
+    <!-- Button to join an existing game with the entered code -->
+    <button id="joinGameButton">Join Game</button>
   </div>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
-  <script src="script.js"></script>
+
+  <script>
+    // Initialize Firebase app with your Firebase project configuration
+    const firebaseConfig = { /* your firebase config */ };
+    const app = firebase.initializeApp(firebaseConfig); // Initialize Firebase
+    const db = firebase.firestore(); // Access Firestore database
+    const auth = firebase.auth(); // Access Firebase Authentication
+
+    // Event listener for when the "Create Game" button is clicked
+    document.getElementById('createGameButton').addEventListener('click', async () => {
+      const gameCode = Math.floor(1000 + Math.random() * 9000); // Generate a random 4-digit code
+
+      // Store the generated game session in Firestore under a document with the game code
+      await db.collection('games').doc(String(gameCode)).set({
+        players: [], // Initialize with an empty list of players
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(), // Store the creation timestamp
+      });
+
+      alert(`Game created with code: ${gameCode}`); // Alert the user with the generated code
+    });
+
+    // Event listener for when the "Join Game" button is clicked
+    document.getElementById('joinGameButton').addEventListener('click', async () => {
+      const gameCode = document.getElementById('gameCodeInput').value; // Get the game code entered by the user
+      if (!gameCode) return alert("Please enter a code!"); // If no code entered, show an alert
+
+      // Check if a game session exists with the provided code
+      const gameDoc = await db.collection('games').doc(gameCode).get();
+      if (!gameDoc.exists) return alert("Game not found!"); // If the game code doesn't exist, show an alert
+
+      // If the game exists, sign in the user anonymously (if not already signed in)
+      const user = auth.currentUser || await auth.signInAnonymously();
+      
+      // Add the player's user ID to the list of players in this game
+      await db.collection('games').doc(gameCode).update({
+        players: firebase.firestore.FieldValue.arrayUnion(user.uid), // Add current player's UID to the players array
+      });
+
+      alert("You've joined the game!"); // Inform the player they have joined
+
+      // Redirect to the game page, passing the game code in the URL
+      window.location.href = `game.html?gameCode=${gameCode}`;
+    });
+  </script>
 </body>
 </html>
