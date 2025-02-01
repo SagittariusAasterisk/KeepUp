@@ -20,6 +20,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
+
+
+
 // Elements
 const createGroupBtn = document.getElementById("create-group");
 const joinGroupBtn = document.getElementById("join-group");
@@ -31,6 +34,24 @@ const setupDiv = document.getElementById("setup");
 const gameDiv = document.getElementById("game");
 
 let groupCode = null;
+
+// Generate a unique player ID
+const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
+
+// Join a group
+function joinGroup(groupCode) {
+  const playerRef = ref(db, `groups/${groupCode}/players/${playerID}`);
+
+  // Add the player to the database
+  set(playerRef, {
+    id: playerID,
+    joinedAt: new Date().toISOString(),
+  });
+
+  console.log("Joined group with ID:", playerID);
+}
+
+
 
 // Create Group
 createGroupBtn.addEventListener("click", () => {
@@ -76,7 +97,7 @@ function startGame(code) {
 buzzBtn.addEventListener("click", () => {
   db.ref("groups/" + groupCode + "/buzzed").get().then((snapshot) => {
     if (!snapshot.exists() || snapshot.val() === null) {
-      db.ref("groups/" + groupCode).update({ buzzed: "Player_" + Math.floor(Math.random() * 1000) });
+      db.ref("groups/" + groupCode).update({ buzzed: "Player_" + playerID });
     }
   });
 });
