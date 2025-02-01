@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game Session</title>
+  
+  <!-- Include Firebase SDK scripts for App and Firestore -->
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-firestore.js"></script>
+</head>
+<body>
+  <!-- Display the title of the game session -->
+  <h1>Welcome to the game!</h1>
+
+  <script>
+    // Initialize Firebase app with your Firebase project configuration
+    const firebaseConfig = { /* your firebase config */ };
+    const app = firebase.initializeApp(firebaseConfig); // Initialize Firebase
+    const db = firebase.firestore(); // Access Firestore database
+
+    // Get the game code from the URL query parameters (this was passed when joining the game)
+    const urlParams = new URLSearchParams(window.location.search);
+    const gameCode = urlParams.get('gameCode'); // Extract the game code from the URL
+
+    // Listen for real-time updates on the game session in Firestore
+    db.collection('games').doc(gameCode).onSnapshot(doc => {
+      const gameData = doc.data(); // Get the game data from Firestore document
+      console.log("Players in this game:", gameData.players); // Log the list of players in this game
+
+      // Here you can update the page with information about the game or the players, or start the game logic
+    });
+  </script>
+</body>
+</html>
