@@ -23,6 +23,13 @@ const urlParams = new URLSearchParams(window.location.search);
 const groupCode = urlParams.get("group");
 const playerID = urlParams.get("player");
 
+// Display group and player ID on the page
+document.getElementById("group-code").textContent = groupCode;
+document.getElementById("player-id").textContent = playerID;
+
+console.log("Group Code:", groupCode);
+console.log("Player ID:", playerID);
+
 // Listen for new players and update UI
 const playersRef = ref(db, `groups/${groupCode}/players`);
 onValue(playersRef, (snapshot) => {
