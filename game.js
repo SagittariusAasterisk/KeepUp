@@ -1,7 +1,20 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
 import { getDatabase, ref, onValue, set, update } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
 
-const firebaseConfig = { /* Your Config */ };
+const firebaseConfig = {
+  apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+  authDomain: "keepup-2cbcc.firebaseapp.com",
+  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "keepup-2cbcc",
+  storageBucket: "keepup-2cbcc.firebasestorage.app",
+  messagingSenderId: "3097195539",
+  appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
+  measurementId: "G-3G12YZ6PPP"
+  /*apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
+  authDomain: "keepup-2cbcc.firebaseapp.com",
+  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
+  projectId: "keepup-2cbcc",*/
+};
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
