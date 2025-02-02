@@ -35,72 +35,56 @@ const gameDiv = document.getElementById("game");
 
 let groupCode = null;
 
-// Generate a unique player ID
-const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
 
-// Join a group
-function joinGroup(groupCode) {
-  const playerRef = ref(db, `groups/${groupCode}/players/${playerID}`);
 
-  // Add the player to the database
-  set(playerRef, {
-    id: playerID,
-    joinedAt: new Date().toISOString(),
-  });
-
-  console.log("Joined group with ID:", playerID);
+// Generate random 6-letter group code
+function generateGroupCode() {
+    return Math.random().toString(36).substring(2, 8).toUpperCase();
 }
 
+// Create a new group and redirect
+document.getElementById("create-group").addEventListener("click", () => {
+    const groupCode = generateGroupCode();
+    const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
 
-
-// Create Group
-createGroupBtn.addEventListener("click", () => {
-  groupCode = Math.floor(1000 + Math.random() * 9000); // Generate random 4-digit code
-  db.ref("groups/" + groupCode).set({ buzzed: null });
-  alert("Group created! Code: " + groupCode);
-  startGame(groupCode);
-});
-
-// Join Group
-joinGroupBtn.addEventListener("click", () => {
-  groupCode = groupCodeInput.value;
-  if (groupCode) {
-    db.ref("groups/" + groupCode).get().then((snapshot) => {
-      if (snapshot.exists()) {
-        startGame(groupCode);
-      } else {
-        alert("Group not found!");
-      }
+    // Save the group and creator in Firebase
+    set(ref(db, `groups/${groupCode}`), {
+        players: { [playerID]: { id: playerID } },
+        gameState: {
+            isStarted: false,
+            activePlayer: null,
+            round: 0,
+            totalRounds: 20,
+            startTime: null,
+            endTime: null
+        }
     });
-  } else {
-    alert("Enter a group code!");
-  }
+
+    // Redirect creator to the game page
+    window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
 });
 
-// Start Game
-function startGame(code) {
-  setupDiv.style.display = "none";
-  gameDiv.style.display = "block";
-  groupInfo.innerText = "Group Code: " + code;
-  buzzBtn.style.display = "inline-block";
 
-  // Listen for winner
-  db.ref("groups/" + code + "/buzzed").on("value", (snapshot) => {
-    if (snapshot.exists() && snapshot.val() !== null) {
-      result.innerText = "Winner: " + snapshot.val();
-      buzzBtn.disabled = true;
-    }
-  });
-}
+// Join an existing group
+document.getElementById("join-group").addEventListener("click", () => {
+    const groupCode = document.getElementById("group-code").value.trim();
+    const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
 
-// Buzz Button
-buzzBtn.addEventListener("click", () => {
-  db.ref("groups/" + groupCode + "/buzzed").get().then((snapshot) => {
-    if (!snapshot.exists() || snapshot.val() === null) {
-      db.ref("groups/" + groupCode).update({ buzzed: "Player_" + playerID });
+    if (groupCode) {
+        set(ref(db, `groups/${groupCode}/players/${playerID}`), { id: playerID });
+        window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
+    } else {
+        alert("Enter a valid group code.");
     }
-  });
 });
+
+
+
+
+
+
+
+
 
 /*
 <script type="module">
