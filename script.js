@@ -64,12 +64,17 @@ document.getElementById("create-group").addEventListener("click", () => {
     window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
 });
 
+// Generate Player ID based on click time
+function generatePlayerID() {
+    return "player-" + Date.now().toString().slice(-5) + Math.floor(Math.random() * 100);
+}
+
 
 // Join an existing group
 document.getElementById("join-group").addEventListener("click", () => {
     const groupCode = document.getElementById("group-code").value.trim();
-    const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
-
+    const playerID = generatePlayerID(); // Unique Player ID
+  
     if (groupCode) {
         set(ref(db, `groups/${groupCode}/players/${playerID}`), { id: playerID });
         window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
