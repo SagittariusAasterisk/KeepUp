@@ -118,4 +118,17 @@ onValue(gameStateRef, (snapshot) => {
 
 // Function to pick a random player
 function getRandomPlayer() {
-    const player
+    const playerKeys = Object.keys(players);
+    if (playerKeys.length === 0) return null;
+
+    const randomIndex = Math.floor(Math.random() * playerKeys.length);
+    return players[playerKeys[randomIndex]];
+}
+
+// Ensure game properly registers endTime
+onValue(gameStateRef, (snapshot) => {
+    const gameState = snapshot.val();
+    if (gameState && gameState.round >= gameState.totalRounds && !gameState.endTime) {
+        update(gameStateRef, { endTime: Date.now() });
+    }
+});
