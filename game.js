@@ -48,6 +48,32 @@ onValue(playersRef, (snapshot) => {
 
     console.log("Updated Players:", players);
 });
+/*
+const playersRef = ref(db, `groups/${groupCode}/players`);
+
+onValue(playersRef, (snapshot) => {
+    players = {}; // Reset players list each time
+
+    snapshot.forEach((child) => {
+        players[child.key] = child.val().id; // Store player ID in global object
+    });
+
+    console.log("Updated Players:", players);
+
+    updatePlayerListUI(); // Call function to update UI
+});
+*/
+function updatePlayerListUI() {
+    const playerList = document.getElementById("player-list");
+    playerList.innerHTML = ""; // Clear old list
+
+    Object.values(players).forEach((playerID) => {
+        const li = document.createElement("li");
+        li.textContent = playerID;
+        playerList.appendChild(li);
+    });
+}
+
 
 // Start Game Button (only for host)
 document.getElementById("start-game").addEventListener("click", () => {
