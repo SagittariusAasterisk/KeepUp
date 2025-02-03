@@ -10,11 +10,8 @@ const firebaseConfig = {
   messagingSenderId: "3097195539",
   appId: "1:3097195539:web:3052c10553ef1bee14fbe6",
   measurementId: "G-3G12YZ6PPP"
-  /*apiKey: "AIzaSyDYz7JFIRarFhA6-iRGeyVcZwm1IFJNppE",
-  authDomain: "keepup-2cbcc.firebaseapp.com",
-  databaseURL: "https://keepup-2cbcc-default-rtdb.europe-west1.firebasedatabase.app",
-  projectId: "keepup-2cbcc",*/
 };
+
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
@@ -30,23 +27,39 @@ document.getElementById("player-id").textContent = playerID;
 console.log("Group Code:", groupCode);
 console.log("Player ID:", playerID);
 
+// Store players globally to use in getRandomPlayer()
+let players = {};
+
 // Listen for new players and update UI
 const playersRef = ref(db, `groups/${groupCode}/players`);
 onValue(playersRef, (snapshot) => {
     const playerList = document.getElementById("player-list");
     playerList.innerHTML = "";
+    players = {}; // Reset global players object
+
     snapshot.forEach((child) => {
+        const playerData = child.val();
+        players[child.key] = playerData.id; // Store in global object
+
         const li = document.createElement("li");
-        li.textContent = child.val().id;
+        li.textContent = playerData.id;
         playerList.appendChild(li);
     });
+
+    console.log("Updated Players:", players);
 });
 
 // Start Game Button (only for host)
 document.getElementById("start-game").addEventListener("click", () => {
+    const firstPlayer = getRandomPlayer();
+    if (!firstPlayer) {
+        alert("No players available!");
+        return;
+    }
+
     update(ref(db, `groups/${groupCode}/gameState`), {
         isStarted: true,
-        activePlayer: null,
+        activePlayer: firstPlayer,
         round: 0,
         totalRounds: 20,
         startTime: Date.now(),
@@ -63,7 +76,6 @@ onValue(gameStateRef, (snapshot) => {
     // Hide start button after game begins
     document.getElementById("start-game").style.display = "none";
 
-    // Display game logic
     if (gameState.round < gameState.totalRounds) {
         if (gameState.activePlayer === playerID) {
             // Show red button for active player
@@ -106,10 +118,4 @@ onValue(gameStateRef, (snapshot) => {
 
 // Function to pick a random player
 function getRandomPlayer() {
-    return Object.keys(players)[Math.floor(Math.random() * Object.keys(players).length)];
-}
-
-if (gameState.round >= gameState.totalRounds) {
-    update(gameStateRef, { endTime: Date.now() });
-}
-
+    const player
