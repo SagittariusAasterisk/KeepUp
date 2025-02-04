@@ -29,7 +29,7 @@ console.log("Player ID:", playerID);
 
 // Store players globally to use in getRandomPlayer()
 let players = {};
-
+/*
 // Listen for new players and update UI
 const playersRef = ref(db, `groups/${groupCode}/players`);
 onValue(playersRef, (snapshot) => {
@@ -48,7 +48,7 @@ onValue(playersRef, (snapshot) => {
 
     console.log("Updated Players:", players);
 });
-
+*/
 //const playersRef = ref(db, `groups/${groupCode}/players`);
 
 onValue(playersRef, (snapshot) => {
