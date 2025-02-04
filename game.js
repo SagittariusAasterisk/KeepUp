@@ -49,7 +49,7 @@ onValue(playersRef, (snapshot) => {
     console.log("Updated Players:", players);
 });
 
-const playersRef = ref(db, `groups/${groupCode}/players`);
+//const playersRef = ref(db, `groups/${groupCode}/players`);
 
 onValue(playersRef, (snapshot) => {
     players = {}; // Reset players list each time
