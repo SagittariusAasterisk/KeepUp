@@ -63,24 +63,36 @@ onValue(playersRef, (snapshot) => {
     updatePlayerListUI(); // Call function to update UI
 });
 
+function updatePlayerListUI() {
+    const playerList = document.getElementById("player-list");
+    playerList.innerHTML = ""; // Clear old list
 
+    Object.values(players).forEach((playerID) => {
+        const li = document.createElement("li");
+        li.textContent = playerID;
+        playerList.appendChild(li);
+    });
+}
 
 // Start Game Button (only for host)
 document.getElementById("start-game").addEventListener("click", () => {
-    const firstPlayer = getRandomPlayer();
-    if (!firstPlayer) {
-        alert("No players available!");
-        return;
-    }
+    setTimeout(() => {
+        const firstPlayer = getRandomPlayer();
+        if (!firstPlayer) {
+            alert("No players available!");
+            return;
+        }
 
-    update(ref(db, `groups/${groupCode}/gameState`), {
-        isStarted: true,
-        activePlayer: firstPlayer,
-        round: 0,
-        totalRounds: 20,
-        startTime: Date.now(),
-        endTime: null
-    });
+        update(ref(db, `groups/${groupCode}/gameState`), {
+            isStarted: true,
+            activePlayer: firstPlayer,
+            round: 0,
+            totalRounds: 20,
+            startTime: Date.now(),
+            endTime: null
+        });
+
+    }, 500); // Small delay to ensure players update
 });
 
 const gameStateRef = ref(db, `groups/${groupCode}/gameState`);
@@ -135,10 +147,13 @@ onValue(gameStateRef, (snapshot) => {
 // Function to pick a random player
 function getRandomPlayer() {
     const playerKeys = Object.keys(players);
-    if (playerKeys.length === 0) return null;
+    if (playerKeys.length === 0) {
+        console.warn("No players available!");
+        return null; // Prevent crashing
+    }
 
     const randomIndex = Math.floor(Math.random() * playerKeys.length);
-    return players[playerKeys[randomIndex]];
+    return players[playerKeys[randomIndex]]; // Pick a random player
 }
 
 // Ensure game properly registers endTime
