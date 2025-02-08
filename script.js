@@ -79,7 +79,13 @@ document.getElementById("join-group").addEventListener("click", () => {
     const playerID = generatePlayerID(); // Unique Player ID
   
     if (groupCode) {
-        set(ref(db, `groups/${groupCode}/players/${playerID}`), { id: playerID });
+        set(ref(db, `groups/${groupCode}/players/${playerID}`), { id: playerID }).then(() => {
+        console.log("Group created and player added:", groupCode, playerID);
+        // Redirect only after confirmation
+        window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
+    }).catch((error) => {
+        console.error("Error creating group:", error);
+    });
         window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
     } else {
         alert("Enter a valid group code.");
