@@ -65,6 +65,7 @@ document.getElementById("create-group").addEventListener("click", () => {
     }).catch((error) => {
         console.error("Error creating group:", error);
     });
+  });
 
 // Generate Player ID based on click time
 function generatePlayerID() {
