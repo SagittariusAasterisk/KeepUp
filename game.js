@@ -145,7 +145,23 @@ onValue(gameStateRef, (snapshot) => {
         });
     }
 });
+function getRandomPlayer(excludePlayer) {
+    const playerKeys = Object.keys(players);
+    
+    if (playerKeys.length <= 1) {
+        console.warn("Only one player available!");
+        return excludePlayer; // If only one player, return the same
+    }
 
+    let randomPlayer;
+    do {
+        randomPlayer = playerKeys[Math.floor(Math.random() * playerKeys.length)];
+    } while (randomPlayer === excludePlayer); // Keep picking until different
+
+    return randomPlayer;
+}
+
+/*
 // Function to pick a random player
 function getRandomPlayer() {
     const playerKeys = Object.keys(players);
@@ -157,7 +173,7 @@ function getRandomPlayer() {
     const randomIndex = Math.floor(Math.random() * playerKeys.length);
     return players[playerKeys[randomIndex]]; // Pick a random player
 }
-
+*/
 // Ensure game properly registers endTime
 onValue(gameStateRef, (snapshot) => {
     const gameState = snapshot.val();
