@@ -29,6 +29,8 @@ console.log("Player ID:", playerID);
 
 // Store players globally to use in getRandomPlayer()
 let players = {};
+
+const playersRef = ref(db, `groups/${groupCode}/players`);
 /*
 // Listen for new players and update UI
 const playersRef = ref(db, `groups/${groupCode}/players`);
