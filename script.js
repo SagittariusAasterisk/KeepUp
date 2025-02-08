@@ -58,11 +58,13 @@ document.getElementById("create-group").addEventListener("click", () => {
             startTime: null,
             endTime: null
         }
+    }).then(() => {
+        console.log("Group created and player added:", groupCode, playerID);
+        // Redirect only after confirmation
+        window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
+    }).catch((error) => {
+        console.error("Error creating group:", error);
     });
-
-    // Redirect creator to the game page
-    window.location.href = `game.html?group=${groupCode}&player=${playerID}`;
-});
 
 // Generate Player ID based on click time
 function generatePlayerID() {
