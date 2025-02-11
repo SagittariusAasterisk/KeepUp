@@ -53,6 +53,10 @@ onValue(playersRef, (snapshot) => {
 */
 //const playersRef = ref(db, `groups/${groupCode}/players`);
 
+
+// stop listenning to the old group before setting up a new one
+off(playersRef);
+
 onValue(playersRef, (snapshot) => {
     players = {}; // Reset players list each time
 
