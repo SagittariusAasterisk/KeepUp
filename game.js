@@ -119,7 +119,7 @@ onValue(gameStateRef, (snapshot) => {
 
                 // Move button to another player
                 update(gameStateRef, {
-                    activePlayer: getRandomPlayer(),
+                    activePlayer: getRandomPlayer(gameState.activePlayer),
                     round: gameState.round + 1
                 });
             });
