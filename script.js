@@ -20,7 +20,9 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-
+// reset gloabl variables
+let players={};
+let gamestate={};
 
 
 // Elements
@@ -47,6 +49,11 @@ document.getElementById("create-group").addEventListener("click", () => {
     const groupCode = generateGroupCode();
     const playerID = "player-" + Math.floor(1000 + Math.random() * 9000);
 
+    // reset gloabl variables
+  let players={};
+  let gamestate={};
+
+      
     // Save the group and creator in Firebase
     set(ref(db, `groups/${groupCode}`), {
         players: { [playerID]: { id: playerID } },
