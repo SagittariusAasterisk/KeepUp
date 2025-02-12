@@ -55,7 +55,7 @@ onValue(playersRef, (snapshot) => {
 
 
 // stop listenning to the old group before setting up a new one
-off(playersRef);
+//off(playersRef);
 
 onValue(playersRef, (snapshot) => {
     players = {}; // Reset players list each time
