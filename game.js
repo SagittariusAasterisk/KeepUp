@@ -58,7 +58,7 @@ onValue(playersRef, (snapshot) => {
 //off(playersRef);
 
 onValue(playersRef, (snapshot) => {
-    players = {}; // Reset players list each time
+    //players = {}; // Reset players list each time
 
     snapshot.forEach((child) => {
         players[child.key] = child.val().id; // Store player ID in global object
