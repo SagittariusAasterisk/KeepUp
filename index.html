@@ -1,29 +1,278 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Buzzer Game</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P2P Tap Game</title>
+    <script src="https://jsdelivr.net"></script>
+    <script src="https://cloudflare.com"></script>
+    <script src="https://tailwindcss.com"></script>
+    <style>
+        .bg-yellow { background-color: #facc15 !important; }
+        .bg-black { background-color: #000000 !important; }
+    </style>
 </head>
-<body>
-  <div id="app">
-    <h1>Buzzer Game</h1>
-    <div id="setup">
-      <button id="create-group">Create Group</button>
-      <input type="text" id="group-code" placeholder="Enter Group Code">
-      <button id="join-group">Join Group</button>
+<body class="bg-slate-900 text-white font-sans transition-colors duration-150 select-none">
+
+    <!-- LOBBY SCREEN -->
+    <div id="lobby-screen" class="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+        <h1 class="text-3xl font-bold mb-6">P2P Tap Game</h1>
+        
+        <div id="setup-buttons" class="space-y-4">
+            <button onclick="initHost()" class="w-64 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition">
+                Create Game (Host)
+            </button>
+        </div>
+
+        <div id="qr-container" class="hidden flex flex-col items-center mt-6 bg-white p-6 rounded-xl shadow-2xl">
+            <div id="qrcode"></div>
+            <p class="text-slate-800 font-medium mt-4 text-sm">Scan with other phones to join</p>
+        </div>
+
+        <div id="status-area" class="mt-6 text-slate-400">
+            <p id="peer-status">Choose an option above to start.</p>
+            <p id="connected-count" class="hidden mt-2 font-bold text-green-400">Connected Players: 0</p>
+            <button id="start-btn" onclick="startGame()" class="hidden mt-6 w-64 bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-6 rounded-lg transition">
+                Start Game
+            </button>
+        </div>
     </div>
-    <div id="game" style="display: none;">
-      <h2 id="group-info"></h2>
-      <button id="buzz" style="display: none;">Buzz!</button>
-      <h3 id="result"></h3>
+
+    <!-- GAMEPLAY SCREEN -->
+    <div id="game-screen" class="hidden fixed inset-0 flex flex-col items-center justify-center cursor-pointer touch-none" onclick="handleScreenTap()">
+        <div id="game-ui" class="text-center pointer-events-none">
+            <p id="timer" class="text-4xl font-black drop-shadow-md mb-2"></p>
+            <p id="game-instruction" class="text-lg opacity-75 font-semibold"></p>
+        </div>
     </div>
-  </div>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-  <script type="module"  src="script.js"></script>
 
+    <!-- RESULTS SCREEN -->
+    <div id="results-screen" class="hidden flex flex-col items-center justify-center min-h-screen p-4 text-center">
+        <h1 class="text-4xl font-extrabold mb-2 text-yellow-400">Game Over!</h1>
+        <div class="bg-slate-800 p-6 rounded-2xl shadow-xl max-w-sm w-full my-6 border border-slate-700">
+            <p class="text-slate-400 uppercase tracking-wider text-sm font-bold">Total Taps</p>
+            <p id="final-score" class="text-7xl font-black text-white my-2">0</p>
+        </div>
+        <button id="restart-btn" onclick="restartGame()" class="hidden w-64 bg-yellow-500 hover:bg-yellow-600 text-slate-950 font-bold py-4 px-6 rounded-xl shadow-lg transform active:scale-95 transition text-lg">
+            🔄 Play Again
+        </button>
+        <p id="client-wait-msg" class="hidden text-slate-400 animate-pulse">Waiting for host to restart...</p>
+    </div>
 
+    <script>
+        let peer = null;
+        let connections = []; // Used by host to track clients
+        let hostConnection = null; // Used by client to track host
+        let isHost = false;
+        let myId = "";
 
-  
+        // Game State Variables
+        let activePlayerId = null;
+        let score = 0;
+        let gameTimer = null;
+        let timeLeft = 30;
+        let isGameActive = false;
+
+        // On Page Load: Check if joining via URL QR code
+        window.onload = () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const targetHostId = urlParams.get('join');
+            if (targetHostId) {
+                initClient(targetHostId);
+            }
+        };
+
+        // --- HOST LOGIC ---
+        function initHost() {
+            isHost = true;
+            document.getElementById('setup-buttons').classList.add('hidden');
+            document.getElementById('peer-status').innerText = "Generating lobby connection...";
+
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                myId = id;
+                document.getElementById('peer-status').innerText = "Lobby open! Awaiting connections...";
+                document.getElementById('qr-container').classList.remove('hidden');
+                document.getElementById('connected-count').classList.remove('hidden');
+                
+                // Generate QR code pointing to this exact URL with join parameter
+                const joinUrl = `${window.location.origin}${window.location.pathname}?join=${id}`;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: joinUrl,
+                    width: 200,
+                    height: 200
+                });
+            });
+
+            peer.on('connection', (conn) => {
+                connections.push(conn);
+                updateConnectedCount();
+                document.getElementById('start-btn').classList.remove('hidden');
+
+                conn.on('data', (data) => handleIncomingData(data, conn.peer));
+                conn.on('close', () => {
+                    connections = connections.filter(c => c.peer !== conn.peer);
+                    updateConnectedCount();
+                });
+            });
+        }
+
+        function updateConnectedCount() {
+            document.getElementById('connected-count').innerText = `Connected Players: ${connections.length + 1}`;
+        }
+
+        // --- CLIENT LOGIC ---
+        function initClient(hostId) {
+            isHost = false;
+            document.getElementById('setup-buttons').classList.add('hidden');
+            document.getElementById('peer-status').innerText = "Connecting to host...";
+
+            peer = new Peer();
+
+            peer.on('open', (id) => {
+                myId = id;
+                hostConnection = peer.connect(hostId);
+
+                hostConnection.on('open', () => {
+                    document.getElementById('peer-status').innerText = "Connected to host! Waiting for game to start...";
+                });
+
+                hostConnection.on('data', (data) => handleIncomingData(data, hostId));
+            });
+        }
+
+        // --- NETWORK DATA HANDLING ---
+        function broadcast(data) {
+            connections.forEach(conn => {
+                if (conn.open) conn.send(data);
+            });
+        }
+
+        function handleIncomingData(data, senderId) {
+            if (data.type === 'START_GAME') {
+                setupGameUI();
+            } 
+            else if (data.type === 'UPDATE_STATE') {
+                updateVisualState(data.activePlayerId, data.timeLeft);
+            } 
+            else if (data.type === 'TAP_REGISTERED' && isHost) {
+                if (isGameActive && senderId === activePlayerId) {
+                    score++;
+                    pickNextPlayer();
+                }
+            } 
+            else if (data.type === 'GAME_OVER') {
+                showResults(data.score);
+            }
+        }
+
+        // --- GAMEPLAY ENGINE ---
+        function startGame() {
+            if (!isHost) return;
+            score = 0;
+            timeLeft = 30;
+            isGameActive = true;
+
+            broadcast({ type: 'START_GAME' });
+            setupGameUI();
+            pickNextPlayer();
+
+            gameTimer = setInterval(() => {
+                timeLeft--;
+                if (timeLeft <= 0) {
+                    clearInterval(gameTimer);
+                    isGameActive = false;
+                    broadcast({ type: 'GAME_OVER', score: score });
+                    showResults(score);
+                } else {
+                    broadcastState();
+                }
+            }, 1000);
+        }
+
+        function pickNextPlayer() {
+            const allPlayers = [myId, ...connections.map(c => c.peer)];
+            let nextPlayer;
+            
+            // Avoid picking the exact same phone twice in a row if multiple players are present
+            do {
+                nextPlayer = allPlayers[Math.floor(Math.random() * allPlayers.length)];
+            } while (nextPlayer === activePlayerId && allPlayers.length > 1);
+
+            activePlayerId = nextPlayer;
+            broadcastState();
+        }
+
+        function broadcastState() {
+            const statePayload = {
+                type: 'UPDATE_STATE',
+                activePlayerId: activePlayerId,
+                timeLeft: timeLeft
+            };
+            broadcast(statePayload);
+            updateVisualState(activePlayerId, timeLeft);
+        }
+
+        function setupGameUI() {
+            document.getElementById('lobby-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+        }
+
+        function updateVisualState(currentActiveId, current迫Time) {
+            const gameScreen = document.getElementById('game-screen');
+            const timerEl = document.getElementById('timer');
+            const instEl = document.getElementById('game-instruction');
+
+            timerEl.innerText = current迫Time;
+
+            if (myId === currentActiveId) {
+                document.body.className = "bg-yellow text-slate-950 font-sans transition-colors duration-150 select-none";
+                timerEl.classList.remove('text-white');
+                timerEl.classList.add('text-slate-950');
+                instEl.innerText = "TAP ME!";
+            } else {
+                document.body.className = "bg-black text-white font-sans transition-colors duration-150 select-none";
+                timerEl.classList.remove('text-slate-950');
+                timerEl.classList.add('text-white');
+                instEl.innerText = "Wait for yellow...";
+            }
+        }
+
+        function handleScreenTap() {
+            if (myId === activePlayerId) {
+                if (isHost) {
+                    score++;
+                    pickNextPlayer();
+                } else {
+                    hostConnection.send({ type: 'TAP_REGISTERED' });
+                }
+            }
+        }
+
+        function showResults(finalScore) {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('results-screen').classList.remove('hidden');
+            document.getElementById('final-score').innerText = finalScore;
+            
+            // Re-normalize layout theme back to default slate
+            document.body.className = "bg-slate-900 text-white font-sans select-none";
+
+            if (isHost) {
+                document.getElementById('restart-btn').classList.remove('hidden');
+                document.getElementById('client-wait-msg').classList.add('hidden');
+            } else {
+                document.getElementById('restart-btn').classList.add('hidden');
+                document.getElementById('client-wait-msg').classList.remove('hidden');
+            }
+        }
+
+        function restartGame() {
+            if (isHost) {
+                startGame();
+            }
+        }
+    </script>
 </body>
 </html>
